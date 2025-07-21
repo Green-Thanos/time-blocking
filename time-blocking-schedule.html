@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Time Blocking Schedule</title>
+    <style>
+        .schedule-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .schedule-title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            border-bottom: 3px solid #4299e1;
+            padding-bottom: 12px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .day-column {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .day-header {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #edf2f7;
+            border-radius: 6px;
+        }
+
+        .time-block {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 4px solid;
+        }
+
+        .work {
+            background: #e6fffa;
+            border-left-color: #38b2ac;
+            color: #234e52;
+        }
+
+        .break {
+            background: #fef5e7;
+            border-left-color: #ed8936;
+            color: #744210;
+        }
+
+        .lunch {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+            color: #22543d;
+        }
+
+        .passion {
+            background: #faf5ff;
+            border-left-color: #9f7aea;
+            color: #44337a;
+        }
+
+        .workout {
+            background: #fed7d7;
+            border-left-color: #f56565;
+            color: #742a2a;
+        }
+
+        .reading {
+            background: #ebf8ff;
+            border-left-color: #4299e1;
+            color: #2a4365;
+        }
+
+        .time {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .activity {
+            font-weight: 500;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border-left: 4px solid;
+        }
+
+        .notes {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .notes h3 {
+            margin: 0 0 8px 0;
+            color: #2d3748;
+            font-size: 16px;
+        }
+
+        .notes p {
+            margin: 4px 0;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .schedule-container {
+                margin: 10px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="schedule-container">
+        <h1 class="schedule-title">📅 Weekly Time Blocking Schedule</h1>
+        
+        <div class="days-grid">
+            <div class="day-column">
+                <div class="day-header">Monday</div>
+                <div class="time-block work">
+                    <span class="time">8:45 - 10:45</span>
+                    <span class="activity">Deep Work Session 1</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">10:45 - 11:15</span>
+                    <span class="activity">Morning Break</span>
+                </div>
+                <div class="time-block work">
+                    <span class="time">11:15 - 1:15</span>
+                    <span class="activity">Deep Work Session 2</span>
+                </div>
+                <div class="time-block lunch">
+                    <span class="time">1:15 - 2:15</span>
+                    <span class="activity">Lunch Break</span>
+                </div>
+                <div class="time-block passion">
+                    <span class="time">2:15 - 5:15</span>
+                    <span class="activity">Passion Project</span>
+                </div>
+                <div class="time-block workout">
+                    <span class="time">5:15 - 6:15</span>
+                    <span class="activity">Workout</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">6:15 - 7:15</span>
+                    <span class="activity">Evening Break</span>
+                </div>
+                <div class="time-block reading">
+                    <span class="time">7:15 - 11:00</span>
+                    <span class="activity">Reading & Wind Down</span>
+                </div>
+            </div>
+
+            <div class="day-column">
+                <div class="day-header">Tuesday</div>
+                <div class="time-block work">
+                    <span class="time">8:45 - 10:45</span>
+                    <span class="activity">Deep Work Session 1</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">10:45 - 11:15</span>
+                    <span class="activity">Morning Break</span>
+                </div>
+                <div class="time-block work">
+                    <span class="time">11:15 - 1:15</span>
+                    <span class="activity">Deep Work Session 2</span>
+                </div>
+                <div class="time-block lunch">
+                    <span class="time">1:15 - 2:15</span>
+                    <span class="activity">Lunch Break</span>
+                </div>
+                <div class="time-block passion">
+                    <span class="time">2:15 - 5:15</span>
+                    <span class="activity">Passion Project</span>
+                </div>
+                <div class="time-block workout">
+                    <span class="time">5:15 - 6:15</span>
+                    <span class="activity">Workout</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">6:15 - 7:15</span>
+                    <span class="activity">Evening Break</span>
+                </div>
+                <div class="time-block reading">
+                    <span class="time">7:15 - 11:00</span>
+                    <span class="activity">Reading & Wind Down</span>
+                </div>
+            </div>
+
+            <div class="day-column">
+                <div class="day-header">Wednesday</div>
+                <div class="time-block work">
+                    <span class="time">8:45 - 10:45</span>
+                    <span class="activity">Deep Work Session 1</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">10:45 - 11:15</span>
+                    <span class="activity">Morning Break</span>
+                </div>
+                <div class="time-block work">
+                    <span class="time">11:15 - 1:15</span>
+                    <span class="activity">Deep Work Session 2</span>
+                </div>
+                <div class="time-block lunch">
+                    <span class="time">1:15 - 2:15</span>
+                    <span class="activity">Lunch Break</span>
+                </div>
+                <div class="time-block passion">
+                    <span class="time">2:15 - 5:15</span>
+                    <span class="activity">Passion Project</span>
+                </div>
+                <div class="time-block workout">
+                    <span class="time">5:15 - 6:15</span>
+                    <span class="activity">Workout</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">6:15 - 7:15</span>
+                    <span class="activity">Evening Break</span>
+                </div>
+                <div class="time-block reading">
+                    <span class="time">7:15 - 11:00</span>
+                    <span class="activity">Reading & Wind Down</span>
+                </div>
+            </div>
+
+            <div class="day-column">
+                <div class="day-header">Thursday</div>
+                <div class="time-block work">
+                    <span class="time">8:45 - 10:45</span>
+                    <span class="activity">Deep Work Session 1</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">10:45 - 11:15</span>
+                    <span class="activity">Morning Break</span>
+                </div>
+                <div class="time-block work">
+                    <span class="time">11:15 - 1:15</span>
+                    <span class="activity">Deep Work Session 2</span>
+                </div>
+                <div class="time-block lunch">
+                    <span class="time">1:15 - 2:15</span>
+                    <span class="activity">Lunch Break</span>
+                </div>
+                <div class="time-block passion">
+                    <span class="time">2:15 - 5:15</span>
+                    <span class="activity">Passion Project</span>
+                </div>
+                <div class="time-block workout">
+                    <span class="time">5:15 - 6:15</span>
+                    <span class="activity">Workout</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">6:15 - 7:15</span>
+                    <span class="activity">Evening Break</span>
+                </div>
+                <div class="time-block reading">
+                    <span class="time">7:15 - 11:00</span>
+                    <span class="activity">Reading & Wind Down</span>
+                </div>
+            </div>
+
+            <div class="day-column">
+                <div class="day-header">Friday</div>
+                <div class="time-block work">
+                    <span class="time">8:45 - 10:45</span>
+                    <span class="activity">Deep Work Session 1</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">10:45 - 11:15</span>
+                    <span class="activity">Morning Break</span>
+                </div>
+                <div class="time-block work">
+                    <span class="time">11:15 - 1:15</span>
+                    <span class="activity">Deep Work Session 2</span>
+                </div>
+                <div class="time-block lunch">
+                    <span class="time">1:15 - 2:15</span>
+                    <span class="activity">Lunch Break</span>
+                </div>
+                <div class="time-block passion">
+                    <span class="time">2:15 - 5:15</span>
+                    <span class="activity">Passion Project</span>
+                </div>
+                <div class="time-block workout">
+                    <span class="time">5:15 - 6:15</span>
+                    <span class="activity">Workout</span>
+                </div>
+                <div class="time-block break">
+                    <span class="time">6:15 - 7:15</span>
+                    <span class="activity">Evening Break</span>
+                </div>
+                <div class="time-block reading">
+                    <span class="time">7:15 - 11:00</span>
+                    <span class="activity">Reading & Wind Down</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color work"></div>
+                <span>Deep Work</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color break"></div>
+                <span>Breaks</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color lunch"></div>
+                <span>Lunch</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color passion"></div>
+                <span>Passion Project</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color workout"></div>
+                <span>Workout</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color reading"></div>
+                <span>Reading</span>
+            </div>
+        </div>
+
+        <div class="notes">
+            <h3>📝 Customization Notes</h3>
+            <p><strong>To edit times:</strong> Simply change the time ranges in the "time" spans</p>
+            <p><strong>To edit activities:</strong> Modify the text in the "activity" spans</p>
+            <p><strong>To change colors:</strong> Update the CSS classes (.work, .break, .lunch, etc.)</p>
+            <p><strong>To add/remove blocks:</strong> Copy/paste or delete entire "time-block" divs</p>
+        </div>
+    </div>
+</body>
+</html>
