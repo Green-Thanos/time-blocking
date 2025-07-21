@@ -5,12 +5,9 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import {
   Pencil,
-  Check,
-  X,
   Clock,
   Plus,
   Trash2,
-  Palette,
   Save,
   FolderOpen,
   ArrowLeft,
@@ -229,7 +226,6 @@ export default function InteractiveTimeBlocking() {
       setBlocks(blocks.map((block) => (block.id === editingId ? ({ ...block, ...editForm } as TimeBlock) : block)))
       setEditingId(null)
       setEditForm({})
-      setShowColorPicker(null)
     }
   }
 
@@ -447,6 +443,7 @@ export default function InteractiveTimeBlocking() {
             <ul className="list-disc list-inside space-y-1 ml-4">
               <li>You clear browser data/cookies</li>
               <li>You use incognito/private mode</li>
+              <li>Browser storage limits are exceeded</li>
               <li>Browser storage limits are exceeded</li>
               <li>You switch devices or browsers</li>
             </ul>
@@ -712,7 +709,6 @@ export default function InteractiveTimeBlocking() {
             {blocks.map((block) => {
               const duration = calculateDuration(block.startTime, block.endTime)
               const height = Math.max(80, duration * 0.8)
-              const isEditing = editingId === block.id
 
               return (
                 <div
@@ -725,255 +721,287 @@ export default function InteractiveTimeBlocking() {
                     color: block.color.text,
                   }}
                 >
-                  {isEditing ? (
-                    // Edit Mode
-                    <div className="absolute inset-0 p-4 flex flex-col justify-center">
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <input
-                          type="time"
-                          value={editForm.startTime || ""}
-                          onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
-                          className="px-2 py-1 rounded border text-sm bg-white/90 text-gray-800"
-                        />
-                        <input
-                          type="time"
-                          value={editForm.endTime || ""}
-                          onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
-                          className="px-2 py-1 rounded border text-sm bg-white/90 text-gray-800"
-                        />
+                  {/* Display Mode Only */}
+                  <div className="absolute inset-0 p-4 flex items-center justify-between group">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-bold text-lg">
+                          {block.startTime} - {block.endTime}
+                        </span>
+                        <span className="text-sm opacity-75 bg-white/30 px-2 py-1 rounded-full">
+                          {formatDuration(duration)}
+                        </span>
                       </div>
-                      <input
-                        type="text"
-                        value={editForm.activity || ""}
-                        onChange={(e) => setEditForm({ ...editForm, activity: e.target.value })}
-                        className="px-2 py-1 rounded border text-sm bg-white/90 text-gray-800 mb-2"
-                        placeholder="Activity name"
-                      />
-                      <input
-                        type="text"
-                        value={editForm.category || ""}
-                        onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                        className="px-2 py-1 rounded border text-sm bg-white/90 text-gray-800 mb-2"
-                        placeholder="Category"
-                      />
-
-                      {/* Color Picker */}
-                      <div className="mb-2">
-                        <button
-                          onClick={() => setShowColorPicker(showColorPicker === block.id ? null : block.id)}
-                          className="flex items-center gap-2 px-2 py-1 bg-white/90 text-gray-800 rounded border text-sm hover:bg-white"
-                        >
-                          <Palette className="w-3 h-3" />
-                          Choose Color
-                        </button>
-
-                        {showColorPicker === block.id && (
-                          <div className="mt-2 p-2 bg-white/95 rounded border">
-                            <div className="grid grid-cols-5 gap-1">
-                              {defaultColors.map((color, index) => (
-                                <button
-                                  key={index}
-                                  onClick={() => selectColor(index)}
-                                  className="w-6 h-6 rounded border-2 hover:scale-110 transition-transform"
-                                  style={{
-                                    background: color.background,
-                                    borderColor: editForm.color === color ? "#000" : color.border,
-                                  }}
-                                  title={`Color ${index + 1}`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={saveEdit}
-                          className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                        >
-                          <Check className="w-3 h-3" />
-                          Save
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                        >
-                          <X className="w-3 h-3" />
-                          Cancel
-                        </button>
-                      </div>
+                      <div className="font-medium text-base mb-1">{block.activity}</div>
+                      <div className="text-sm opacity-75">{block.category}</div>
                     </div>
-                  ) : (
-                    // Display Mode
-                    <div className="absolute inset-0 p-4 flex items-center justify-between group">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <span className="font-bold text-lg">
-                            {block.startTime} - {block.endTime}
-                          </span>
-                          <span className="text-sm opacity-75 bg-white/30 px-2 py-1 rounded-full">
-                            {formatDuration(duration)}
-                          </span>
-                        </div>
-                        <div className="font-medium text-base mb-1">{block.activity}</div>
-                        <div className="text-sm opacity-75">{block.category}</div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => startEdit(block)}
-                          className="p-2 hover:bg-white/20 rounded-lg"
-                          title="Edit this block"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteBlock(block.id)}
-                          className="p-2 hover:bg-white/20 rounded-lg text-red-600"
-                          title="Delete this block"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => startEdit(block)}
+                        className="p-2 hover:bg-white/20 rounded-lg"
+                        title="Edit this block"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteBlock(block.id)}
+                        className="p-2 hover:bg-white/20 rounded-lg text-red-600"
+                        title="Delete this block"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </div>
               )
             })}
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-3 mb-6 flex-wrap">
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add Block
-          </button>
-          <button
-            onClick={() => setShowSaveDialog(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
-          >
-            <Save className="w-4 h-4" />
-            Save Schedule
-          </button>
-          <button
-            onClick={() => setViewMode("saved-schedules")}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors shadow-sm"
-          >
-            <Eye className="w-4 h-4" />
-            View Saved ({savedSchedules.length})
-          </button>
-          <div className="relative">
+          {/* Edit Block Modal */}
+          {editingId && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-xl font-semibold text-gray-800">Edit Time Block</h3>
+                  <p className="text-sm text-gray-500 mt-1">Customize your activity details</p>
+                </div>
+
+                {/* Modal Content */}
+                <div className="px-6 py-6 space-y-5">
+                  {/* Time Inputs */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                      <input
+                        type="time"
+                        value={editForm.startTime || ""}
+                        onChange={(e) => setEditForm({ ...editForm, startTime: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-800 bg-gray-50 hover:bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                      <input
+                        type="time"
+                        value={editForm.endTime || ""}
+                        onChange={(e) => setEditForm({ ...editForm, endTime: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-800 bg-gray-50 hover:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Activity Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Activity Name</label>
+                    <input
+                      type="text"
+                      value={editForm.activity || ""}
+                      onChange={(e) => setEditForm({ ...editForm, activity: e.target.value })}
+                      placeholder="What will you be doing?"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-800 bg-gray-50 hover:bg-white"
+                    />
+                  </div>
+
+                  {/* Category Input */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <input
+                      type="text"
+                      value={editForm.category || ""}
+                      onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                      placeholder="Work, Personal, Health, etc."
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-800 bg-gray-50 hover:bg-white"
+                    />
+                  </div>
+
+                  {/* Color Picker */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Color Theme</label>
+                    <div className="grid grid-cols-5 gap-3">
+                      {defaultColors.map((color, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setEditForm({ ...editForm, color: color })}
+                          className={`w-12 h-12 rounded-xl border-3 hover:scale-105 transition-all duration-200 ${
+                            editForm.color === color
+                              ? "border-gray-800 shadow-lg"
+                              : "border-gray-200 hover:border-gray-400"
+                          }`}
+                          style={{
+                            background: color.background,
+                          }}
+                          title={`Color theme ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Duration Preview */}
+                  {editForm.startTime && editForm.endTime && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 text-blue-800">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                          Duration: {formatDuration(calculateDuration(editForm.startTime, editForm.endTime))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+                  <button
+                    onClick={cancelEdit}
+                    className="flex-1 px-4 py-3 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveEdit}
+                    disabled={!editForm.startTime || !editForm.endTime || !editForm.activity || !editForm.category}
+                    className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-3 mb-6 flex-wrap">
             <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+              onClick={() => setShowAddForm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
             >
-              <Download className="w-4 h-4" />
-              Export
+              <Plus className="w-4 h-4" />
+              Add Block
             </button>
-            {showExportMenu && (
-              <div className="absolute right-0 top-12 bg-white rounded-lg shadow-lg border p-2 z-10 min-w-48">
-                <button
-                  onClick={exportCurrentAsJSON}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  Export Current as JSON
-                </button>
-                <button
-                  onClick={exportScreenshot}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center gap-2"
-                >
-                  <Camera className="w-4 h-4" />
-                  Export as Screenshot
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Save Dialog */}
-        {showSaveDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-sm w-full">
-              <h3 className="text-lg font-semibold mb-4">Save Schedule</h3>
-              <input
-                type="text"
-                value={saveName}
-                onChange={(e) => setSaveName(e.target.value)}
-                placeholder="Enter schedule name..."
-                className="w-full px-3 py-2 border rounded-lg mb-4"
-                onKeyDown={(e) => e.key === "Enter" && saveSchedule()}
-                autoFocus
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={saveSchedule}
-                  disabled={!saveName.trim()}
-                  className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => {
-                    setShowSaveDialog(false)
-                    setSaveName("")
-                  }}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-              </div>
+            <button
+              onClick={() => setShowSaveDialog(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
+            >
+              <Save className="w-4 h-4" />
+              Save Schedule
+            </button>
+            <button
+              onClick={() => setViewMode("saved-schedules")}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors shadow-sm"
+            >
+              <Eye className="w-4 h-4" />
+              View Saved ({savedSchedules.length})
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+              {showExportMenu && (
+                <div className="absolute right-0 top-12 bg-white rounded-lg shadow-lg border p-2 z-10 min-w-48">
+                  <button
+                    onClick={exportCurrentAsJSON}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Export Current as JSON
+                  </button>
+                  <button
+                    onClick={exportScreenshot}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded flex items-center gap-2"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Export as Screenshot
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Add Form Modal */}
-        {showAddForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-sm w-full">
-              <h3 className="text-lg font-semibold mb-4">Add New Time Block</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                A new block will be added and you can immediately edit it to customize the details.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={addNewBlock}
-                  className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
-                >
-                  Add Block
-                </button>
-                <button
-                  onClick={() => setShowAddForm(false)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
+          {/* Save Dialog */}
+          {showSaveDialog && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+                <h3 className="text-lg font-semibold mb-4">Save Schedule</h3>
+                <input
+                  type="text"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="Enter schedule name..."
+                  className="w-full px-3 py-2 border rounded-lg mb-4"
+                  onKeyDown={(e) => e.key === "Enter" && saveSchedule()}
+                  autoFocus
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={saveSchedule}
+                    disabled={!saveName.trim()}
+                    className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSaveDialog(false)
+                      setSaveName("")
+                    }}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Instructions */}
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-blue-800 mb-2">Editor Mode:</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>
-              • <strong>Backup:</strong> Export your schedules as JSON files for safekeeping
-            </li>
-            <li>
-              • <strong>Share:</strong> Export as screenshot to share your schedule visually
-            </li>
-            <li>
-              • <strong>Import:</strong> Restore schedules from JSON backup files
-            </li>
-            <li>
-              • <strong>Edit:</strong> Hover over blocks to edit or delete them
-            </li>
-          </ul>
+          {/* Add Form Modal */}
+          {showAddForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+                <h3 className="text-lg font-semibold mb-4">Add New Time Block</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  A new block will be added and you can immediately edit it to customize the details.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={addNewBlock}
+                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                  >
+                    Add Block
+                  </button>
+                  <button
+                    onClick={() => setShowAddForm(false)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="font-semibold text-blue-800 mb-2">Editor Mode:</h3>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>
+                • <strong>Backup:</strong> Export your schedules as JSON files for safekeeping
+              </li>
+              <li>
+                • <strong>Share:</strong> Export as screenshot to share your schedule visually
+              </li>
+              <li>
+                • <strong>Import:</strong> Restore schedules from JSON backup files
+              </li>
+              <li>
+                • <strong>Edit:</strong> Hover over blocks to edit or delete them
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
