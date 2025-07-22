@@ -186,6 +186,7 @@ export default function InteractiveTimeBlocking() {
   const [showDataWarning, setShowDataWarning] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const screenshotRef = useRef<HTMLDivElement>(null)
+  const [showAllSchedules, setShowAllSchedules] = useState(false)
 
   // Load saved schedules from localStorage on mount
   useEffect(() => {
@@ -355,9 +356,40 @@ export default function InteractiveTimeBlocking() {
     setShowExportMenu(false)
   }
 
-  const exportScreenshot = () => {
-    // For now, just export as JSON since screenshot functionality requires additional setup
-    exportCurrentAsJSON()
+  const exportScreenshot = async () => {
+    if (!screenshotRef.current) return
+
+    try {
+      // Try to use html2canvas if available
+      const html2canvas = (await import("html2canvas")).default
+      const canvas = await html2canvas(screenshotRef.current, {
+        backgroundColor: "#f8fafc",
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true,
+      })
+
+      canvas.toBlob((blob) => {
+        if (!blob) return
+
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `schedule-${new Date().toISOString().split("T")[0]}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, "image/png")
+
+      setShowExportMenu(false)
+    } catch (error) {
+      console.error("Screenshot export failed, falling back to JSON:", error)
+      exportCurrentAsJSON()
+      setShowExportMenu(false)
+    }
   }
 
   // Import functions
@@ -532,7 +564,7 @@ export default function InteractiveTimeBlocking() {
             </div>
           ) : (
             <div className="space-y-4">
-              {savedSchedules.map((schedule, index) => (
+              {(showAllSchedules ? savedSchedules : savedSchedules.slice(0, 3)).map((schedule, index) => (
                 <div
                   key={schedule.id}
                   draggable
@@ -547,7 +579,7 @@ export default function InteractiveTimeBlocking() {
                     <div className="flex items-start gap-4 flex-1">
                       <GripVertical className="w-5 h-5 text-slate-400 mt-1 flex-shrink-0" />
 
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         {editingScheduleName === schedule.id ? (
                           <div className="flex gap-2 mb-2">
                             <input
@@ -567,19 +599,20 @@ export default function InteractiveTimeBlocking() {
                           </div>
                         ) : (
                           <h3
-                            className="text-xl font-semibold text-slate-800 mb-2 cursor-pointer hover:text-blue-600"
+                            className="text-xl font-semibold text-slate-800 mb-2 cursor-pointer hover:text-blue-600 truncate"
                             onClick={() => setEditingScheduleName(schedule.id)}
+                            title={schedule.name}
                           >
                             {schedule.name}
                           </h3>
                         )}
 
-                        <div className="flex items-center gap-4 text-sm text-slate-500 mb-3">
-                          <span>Created: {formatDate(schedule.createdAt)}</span>
+                        <div className="flex items-center gap-4 text-sm text-slate-500 mb-3 flex-wrap">
+                          <span className="whitespace-nowrap">Created: {formatDate(schedule.createdAt)}</span>
                           <span>•</span>
-                          <span>{schedule.blocks.length} activities</span>
+                          <span className="whitespace-nowrap">{schedule.blocks.length} activities</span>
                           <span>•</span>
-                          <span>
+                          <span className="whitespace-nowrap">
                             {formatDuration(
                               schedule.blocks.reduce(
                                 (total, block) => total + calculateDuration(block.startTime, block.endTime),
@@ -594,18 +627,20 @@ export default function InteractiveTimeBlocking() {
                           {schedule.blocks.slice(0, 6).map((block) => (
                             <div
                               key={block.id}
-                              className="px-3 py-1 rounded-full text-xs font-medium border"
+                              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap"
                               style={{
                                 background: block.color.background,
                                 borderColor: block.color.border,
                                 color: block.color.text,
                               }}
+                              title={`${block.startTime} - ${block.endTime}: ${block.activity}`}
                             >
-                              {block.startTime} {block.activity}
+                              {block.startTime}{" "}
+                              {block.activity.length > 15 ? block.activity.substring(0, 15) + "..." : block.activity}
                             </div>
                           ))}
                           {schedule.blocks.length > 6 && (
-                            <div className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-600">
+                            <div className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-600 whitespace-nowrap">
                               +{schedule.blocks.length - 6} more
                             </div>
                           )}
@@ -613,10 +648,10 @@ export default function InteractiveTimeBlocking() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex gap-2 ml-4 flex-shrink-0">
                       <button
                         onClick={() => loadSchedule(schedule)}
-                        className="flex items-center gap-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+                        className="flex items-center gap-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm whitespace-nowrap"
                         title="Load and edit this schedule"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -624,7 +659,7 @@ export default function InteractiveTimeBlocking() {
                       </button>
                       <button
                         onClick={() => deleteSchedule(schedule.id)}
-                        className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+                        className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm whitespace-nowrap"
                         title="Delete this schedule"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -634,6 +669,28 @@ export default function InteractiveTimeBlocking() {
                   </div>
                 </div>
               ))}
+
+              {/* View More/Less Button */}
+              {savedSchedules.length > 3 && (
+                <div className="text-center py-4">
+                  <button
+                    onClick={() => setShowAllSchedules(!showAllSchedules)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium"
+                  >
+                    {showAllSchedules ? (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        Show Less ({savedSchedules.length - 3} hidden)
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        View More ({savedSchedules.length - 3} more schedules)
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -688,22 +745,23 @@ export default function InteractiveTimeBlocking() {
                   borderColor: block.color.border,
                   color: block.color.text,
                 }}
+                data-time-block="true"
               >
                 {/* Interactive Display Mode */}
                 <div className="absolute inset-0 p-4 flex items-center justify-between group">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="font-bold text-lg">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-bold text-lg whitespace-nowrap">
                         {block.startTime} - {block.endTime}
                       </span>
-                      <span className="text-sm opacity-75 bg-white/30 px-2 py-1 rounded-full">
+                      <span className="text-sm opacity-75 bg-white/30 px-2 py-1 rounded-full whitespace-nowrap">
                         {formatDuration(duration)}
                       </span>
                     </div>
-                    <div className="font-medium text-base mb-1">{block.activity}</div>
-                    <div className="text-sm opacity-75">{block.category}</div>
+                    <div className="font-medium text-base mb-1 truncate">{block.activity}</div>
+                    <div className="text-sm opacity-75 truncate">{block.category}</div>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4 flex-shrink-0">
                     <button
                       onClick={() => startEdit(block)}
                       className="p-2 hover:bg-white/20 rounded-lg"
