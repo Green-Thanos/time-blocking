@@ -355,39 +355,9 @@ export default function InteractiveTimeBlocking() {
     setShowExportMenu(false)
   }
 
-  const exportScreenshot = async () => {
-    if (!screenshotRef.current) return
-
-    try {
-      // Create canvas manually instead of using html2canvas
-      const element = screenshotRef.current
-      const rect = element.getBoundingClientRect()
-
-      // Create a canvas
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-
-      // Set canvas size
-      canvas.width = rect.width * 2 // 2x for high DPI
-      canvas.height = rect.height * 2
-      ctx.scale(2, 2)
-
-      // Fill background
-      ctx.fillStyle = "#f8fafc"
-      ctx.fillRect(0, 0, rect.width, rect.height)
-
-      // Simple fallback - just download the current schedule as JSON
-      // Since html2canvas might not work in all environments
-      exportCurrentAsJSON()
-
-      setShowExportMenu(false)
-    } catch (error) {
-      console.error("Screenshot export failed:", error)
-      // Fallback to JSON export
-      exportCurrentAsJSON()
-      setShowExportMenu(false)
-    }
+  const exportScreenshot = () => {
+    // For now, just export as JSON since screenshot functionality requires additional setup
+    exportCurrentAsJSON()
   }
 
   // Import functions
